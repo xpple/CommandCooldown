@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "commandcooldown",
+  "version": "${version}",
+  "name": "Command Cooldown",
+  "description": "Adds configurable cooldown to commands",
+  "authors": [
+    "xpple"
+  ],
+  "contact": {
+    "sources": "https://github.com/xpple/CommandCooldown"
+  },
+  "license": "Unlicense",
+  "icon": "assets/commandcooldown/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "server": [
+      "dev.xpple.commandcooldown.CommandCooldown"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.22",
+    "minecraft": ">=1.20"
+  },
+  "mixins": [
+    "commandcooldown.mixins.json"
+  ]
+}
