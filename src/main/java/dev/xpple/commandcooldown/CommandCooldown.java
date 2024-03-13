@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.IntSupplier;
 
 public class CommandCooldown implements DedicatedServerModInitializer {
     private static final Map<UUID, Set<String>> activeCooldowns = new HashMap<>();
@@ -19,27 +20,33 @@ public class CommandCooldown implements DedicatedServerModInitializer {
         new ModConfigBuilder("commandcooldown", Configs.class).build();
     }
 
-    public static boolean checkCooldown(UUID uuid, String command) {
+    public static boolean checkCooldown(UUID uuid, String command, IntSupplier commandOutput) {
         Integer cooldown = Configs.cooldowns.get(command);
         if (cooldown == null) {
+            commandOutput.getAsInt();
             return true;
         }
 
-        Set<String> cooldowns = activeCooldowns.putIfAbsent(uuid, createExpiringSet(command, cooldown));
+        Set<String> cooldowns = activeCooldowns.get(uuid);
         if (cooldowns == null) {
+            activeCooldowns.put(uuid, createExpiringSet(command, cooldown, commandOutput));
             return true;
         }
 
         if (cooldowns.contains(command)) {
             return false;
         }
-        cooldowns.add(command);
+        if (commandOutput.getAsInt() != 0) {
+            cooldowns.add(command);
+        }
         return true;
     }
 
-    private static Set<String> createExpiringSet(String command, int cooldown) {
+    private static Set<String> createExpiringSet(String command, int cooldown, IntSupplier commandOutput) {
         Set<String> cooldowns = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(cooldown)).<String, Boolean>build().asMap());
-        cooldowns.add(command);
+        if (commandOutput.getAsInt() != 0) {
+            cooldowns.add(command);
+        }
         return cooldowns;
     }
 }
